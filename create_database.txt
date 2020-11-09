@@ -4,7 +4,7 @@ CREATE DATABASE BIBTEX_DB;
 
 CREATE TABLE CATEGORIES(
     `categoryID` int NOT NULL AUTO_INCREMENT,
-    `name` int NOT NULL,
+    `name` varchar(255) NOT NULL,
     PRIMARY KEY(`categoryID`)
 );
 
