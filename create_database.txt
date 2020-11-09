@@ -1,0 +1,20 @@
+--DROP DATABASE BIBTEX_DB;
+
+CREATE DATABASE BIBTEX_DB;
+
+CREATE TABLE CATEGORIES(
+    `categoryID` int NOT NULL AUTO_INCREMENT,
+    `name` int NOT NULL,
+    PRIMARY KEY(`categoryID`)
+);
+
+CREATE TABLE BOOKS(
+    `ID` int NOT NULL AUTO_INCREMENT,
+    `title` varchar(255) NOT NULL,
+    `author` varchar(255) NOT NULL DEFAULT 'n/a',
+    `publisher` varchar(255) NOT NULL DEFAULT 'n/a',
+    `year` DATE NOT NULL,
+    `category` int NOT NULL,
+    PRIMARY KEY(`ID`),
+    FOREIGN KEY fk_cat(`category`) REFERENCES CATEGORIES(categoryID)
+);
