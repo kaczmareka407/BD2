@@ -7,8 +7,12 @@
         <?php
         //biblioteka do zczytywania stron
         include 'simple_html_dom.php';
+        $categories = ["MAT","TEMATYKA DOWOLNA","TO BY NIC NIE DAŁO"];
         
-        
+        function insert()
+        {
+            
+        }
 
         function displayResults($title,$pageNumber)
         {
@@ -36,7 +40,9 @@
             {
                 //echo $i+1+(10*($pageNumber-1)).$temp[$i].'<br>';
                 $elem = $temp[$i]->find('tr');
-                for($j=1;$j<count($elem);$j++)
+                echo (($i+1)+(10*($pageNumber-1))).'  ';
+                echo '<div class="result'.$i.'">';
+                for($j=1;$j<4;$j++)
                 {
                     $temp_res = strip_tags($elem[$j]);
                     if(strlen($temp_res)>5)
@@ -44,9 +50,25 @@
                         echo '<span id="'.$j.'" quantity="'.strlen($temp_res).'">'.$temp_res.'</span><br>';
                     }
                 }
-                echo '<hr>';
-                
+                echo '<span>
+                <button onclick="">Check</button>
+                <button onclick="">Add to database</button>
+                Chose category: <input type="text" list="categories">                
+                </span><br>';
+                echo '</div><hr>';
             }
+            echo'<datalist id="categories">';
+                    foreach($GLOBALS['categories'] as $cat)
+                    {
+                        echo '<option value="'.$cat.'">';        
+                    }
+                echo '
+                    <option value="IT">
+                    <option value="MURARSTWO">
+                    <option value="MATEMATYKA">
+                    <option value="MALARSTWO">
+                    <option value="GRAFY">
+                </datalist>';
         }
         
         function numberOfPages($title)
@@ -77,6 +99,8 @@
         }
         
         $title = @$_GET['title'];
+        //$title = str_replace(" ","+",$title);
+        //echo $title.'<br>';
         /*if(@$_GET['pages']!==null)
         {
             echo @$_GET['pages'].'<br>';
@@ -85,12 +109,12 @@
         if(!empty($title))
         {
             echo '<h2>Searching: '.$title.'</h2><br>';
-            $number_of_pages = numberOfPages($title);
+            $number_of_pages = numberOfPages(str_replace(" ","+",$title));
             
             //wyświetlamy pozycje z każdej strony wyszukiwania
             for($i=1;$i<=$number_of_pages;$i++)
             {
-                displayResults($title,$i);
+                displayResults(str_replace(" ","+",$title),$i);
             }
         }
         else
