@@ -1,4 +1,4 @@
---DROP DATABASE BIBTEX_DB;
+DROP DATABASE BIBTEX_DB;
 
 CREATE DATABASE BIBTEX_DB;
 
@@ -18,3 +18,16 @@ CREATE TABLE BOOKS(
     PRIMARY KEY(`ID`),
     FOREIGN KEY fk_cat(`category`) REFERENCES CATEGORIES(categoryID)
 );
+
+
+INSERT INTO `categories` 
+(`categoryID`, `name`) 
+VALUES 
+(NULL, 'matematyka'), 
+(NULL, 'sieci komputerowe'),
+(NULL, 'teoria grafów'),
+(NULL, 'sztuczna inteligencja'),
+(NULL, 'elektronika'),
+(NULL, 'kryptografia'),
+(NULL, 'robotyka'),
+(NULL, 'socjologia')
