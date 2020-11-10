@@ -1,3 +1,65 @@
+<!--
+
+
+	TODO: Przycisk "zaznacz wiele" - zmienia widoczność checkboxa i przycisku zapisz
+	TODO: po zaznaczeniu checkboxa pojawia się "choose category"
+	
+	ZAZNACZ WIELE -> Pokazuje Checkboxy
+				  -> Pokazuje Zapisz wiele
+				  -> Ukrywa zapisz (pojedynczy)
+				  -> Zmienia nazwę "zaznacz wiele" na "zaznacz jeden"
+
+
+-->
+
+<style>
+	.ptak
+	{
+			visibility: hidden;
+			width:60px;
+			height:60px;
+	}
+</style>
+
+<?php
+	session_start();
+	
+	$servername = "localhost";
+	$username = "admin";
+	$password = "admin";
+	$dbname = "bibtex_db";
+
+	$conn = new mysqli($servername, $username, $password, $dbname);
+	if ($conn->connect_error) 
+	{
+		die("Connection failed: " . $conn->connect_error);
+	}
+	echo "Connected successfully<br>";
+	echo '<a href="https://www.youtube.com/watch?v=73T5NVNb7lE">TU, OBOWIĄZKOWO SPRAWDZIĆ</a>';
+	echo '<img src="https://naukawpolsce.pap.pl/sites/default/files/styles/strona_glowna_slider_750x420/public/202005/portretProboscis_monkey_%28Nasalis_larvatus%29_male_head_0.jpg?itok=4nPIZ3jj" style="float:none;"> "';
+	///Przykład użycia SELECT
+	/*$sql = "SELECT * FROM books";
+
+	$result = $conn->query($sql);
+	
+	if ($result->num_rows > 0) 
+	{
+		while($row = $result->fetch_assoc()) 
+		{
+			echo "id: " . $row["ID"]. " - title: " . $row["title"]. " author: " . $row["author"]. "<br>";
+		}
+	} 
+	else
+	{
+		echo "0 results";
+	}
+
+	$conn->close();*/
+	
+	$_SESSION["baza"] = $conn; // z tego korzystajcie bo to jest baza ZA DARMO!
+?>
+
+
 <!DOCTYPE HTML>
 <html>
     <head>
@@ -48,12 +110,20 @@
                     if(strlen($temp_res)>5)
                     {
                         echo '<span id="'.$j.'" quantity="'.strlen($temp_res).'">'.$temp_res.'</span><br>';
+						/*
+						
+							TODO: SPRAWDZIĆ CZY JEST W BAZIE
+							j=1 - tytuł
+							j=2 - autor
+							j=3 - wydawca
+						
+						*/
                     }
                 }
                 echo '<span>
                 <button onclick="">Check</button>
                 <button onclick="">Add to database</button>
-                Chose category: <input type="text" list="categories">                
+                Chose category: <input type="text" list="categories"><br><input type="checkbox" class="ptak">                
                 </span><br>';
                 echo '</div><hr>';
             }
