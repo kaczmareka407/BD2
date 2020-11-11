@@ -1,6 +1,10 @@
 <!--
 
-
+	--TODO: Wczytywanie wierszy z bazy dla piela
+	--TODO: Sprawdzenie czy jest w bazie książka
+	--TODO: Nieruchome menu
+	
+	Agata:
 	TODO: Przycisk "zaznacz wiele" - zmienia widoczność checkboxa i przycisku zapisz
 	TODO: po zaznaczeniu checkboxa pojawia się "choose category"
 	
@@ -9,15 +13,25 @@
 				  -> Ukrywa zapisz (pojedynczy)
 				  -> Zmienia nazwę "zaznacz wiele" na "zaznacz jeden"
 
-
 -->
 
-<style>
+<style><!-- Agata to potem przeniesie do style.css -->
 	.ptak
 	{
 			/* visibility: hidden; */
 			width:60px;
 			height:60px;
+	}
+	
+	#menu
+	{
+		width: 100%;
+		top: 0;
+		background-color:white;
+		border: 4px;
+		border-style: solid;
+		border-color: aqua;
+		position:sticky;
 	}
 </style>
 
@@ -34,21 +48,22 @@
 	{
 		die("Connection failed: " . $conn->connect_error);
 	}
-	// echo "Connected successfully<br>";
-	// echo '<a href="https://www.youtube.com/watch?v=73T5NVNb7lE">TU, OBOWIĄZKOWO SPRAWDZIĆ</a>';
-	// echo '<img src="https://naukawpolsce.pap.pl/sites/default/files/styles/strona_glowna_slider_750x420/public/202005/portretProboscis_monkey_%28Nasalis_larvatus%29_male_head_0.jpg?itok=4nPIZ3jj" style="float:none;"> ';
     
-    
-    ///Przykład użycia SELECT
-	/*$sql = "SELECT * FROM books";
-
-	$result = $conn->query($sql);
+    ///Przykład użycia SELECT dla Magosa Ioannesa Pielusa
+	/*
 	
-	if ($result->num_rows > 0) 
+	$sql = "SELECT * FROM books"; //zapytanie
+
+	$result = $conn->query($sql);//wczytanie wyniku zapytania
+	
+	if ($result->num_rows > 0) //jeżeli zapytanie zwróciło więcej niż 0 wierszy
 	{
-		while($row = $result->fetch_assoc()) 
+		while($row = $result->fetch_assoc()) //do $row przypisujemy kolejny wiersz, po prostu to sobie skopiujcie
 		{
 			echo "id: " . $row["ID"]. " - title: " . $row["title"]. " author: " . $row["author"]. "<br>";
+			
+			//$row["nazwa_kolumny"] - pod tym siedzi to co jest w wierszu pod danym polem
+			//$row traktujemy jak mapę
 		}
 	} 
 	else
@@ -56,9 +71,33 @@
 		echo "0 results";
 	}
 
-	$conn->close();*/
+	 //zakończ połączenie z bazą
 	
-	$_SESSION["baza"] = $conn; // z tego korzystajcie bo to jest baza ZA DARMO!
+	*/
+	
+	///INSERT do bazy dla Magosa Ballusa
+	/*
+		$conn = $_SESSION["baza"];
+				if($stmt = $conn->prepare("INSERT INTO books (title, author, publisher, year, category) VALUES (?, ?, ?, ?, ?)"))
+				{
+					//sssii znaczy string*3 int*2 - inne: d-double, b-BLOB
+					$stmt->bind_param("sssii", $title, $author, $publisher, $year, $cat);
+					$title = "grafy";
+					$author = "zwierz";
+					$publisher = "poli";
+					$year = 2137;
+					$cat = 3;
+					$stmt->execute();
+				}
+				else
+				{
+					echo "nie można dodać do bazy bo tak";
+				}
+				
+	*/
+	
+	
+	$_SESSION["baza"] = $conn; //tutaj jest baza i jest dostępna cały czas w trakcie działania sesji
 ?>
 
 
@@ -72,6 +111,10 @@
         //biblioteka do zczytywania stron
         include 'simple_html_dom.php';
         
+		//wyrysuj nieruchome menu
+		echo '
+		<div id="menu">To jest kontener na menu<br><br><br><br></div>
+		';
 
         function displayResults($title,$pageNumber)
         {
@@ -99,22 +142,35 @@
             {
                 //echo $i+1+(10*($pageNumber-1)).$temp[$i].'<br>';
                 $elem = $temp[$i]->find('tr');
-                echo (($i+1)+(10*($pageNumber-1))).'  ';
-                echo '<div class="result'.$i.'">';
+                
+				
+				/*
+						
+							--TODO: SPRAWDZIĆ CZY JEST W BAZIE
+							j=1 - tytuł
+							j=2 - autor
+							j=3 - wydawca
+						
+				*/
+				//check for books in database
+				$author = str_replace("Autor: ","",strip_tags($elem[2]));
+				$sql = 'SELECT * FROM books WHERE title LIKE "'.strip_tags($elem[1]).'" AND author LIKE "'.$author.'" AND publisher LIKE "'.strip_tags($elem[3]).'"';
+				
+				$result = $_SESSION["baza"]->query($sql);//wczytanie wyniku zapytania
+				
+				//select color (red or green)
+				if ($result->num_rows > 0)echo '<div class="result'.$i.'" style="border: 4px; border-color: green; border-style: solid;">';
+				else echo '<div class="result'.$i.'" style="border: 4px; border-color: red; border-style: solid;">';
+				echo (($i+1)+(10*($pageNumber-1))).'  ';
+				
                 for($j=1;$j<4;$j++)
                 {
                     $temp_res = strip_tags($elem[$j]);
                     if(strlen($temp_res)>5)
                     {
+						
                         echo '<span id="'.$j.'" quantity="'.strlen($temp_res).'">'.$temp_res.'</span><br>';
-						/*
-						
-							TODO: SPRAWDZIĆ CZY JEST W BAZIE
-							j=1 - tytuł
-							j=2 - autor
-							j=3 - wydawca
-						
-						*/
+
                     }
                 }
                 echo '<span>
@@ -122,7 +178,7 @@
                 <button onclick="">Add to database</button>
                 Chose category: <input type="text" list="categories"><br><input type="checkbox" class="ptak">                
                 </span><br>';
-                echo '</div><hr>';
+                echo '</div>';
             }
                 if($queryResult = $_SESSION["baza"]->query('SELECT `name` FROM `categories` ORDER BY 1;'))
                 {
@@ -198,7 +254,7 @@
         display();
         
         
-        
+        $conn->close();
         ?>
         
     </body>
