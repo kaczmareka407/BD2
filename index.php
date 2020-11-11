@@ -15,7 +15,7 @@
 <style>
 	.ptak
 	{
-			visibility: hidden;
+			/* visibility: hidden; */
 			width:60px;
 			height:60px;
 	}
@@ -34,10 +34,12 @@
 	{
 		die("Connection failed: " . $conn->connect_error);
 	}
-	echo "Connected successfully<br>";
-	echo '<a href="https://www.youtube.com/watch?v=73T5NVNb7lE">TU, OBOWIĄZKOWO SPRAWDZIĆ</a>';
-	echo '<img src="https://naukawpolsce.pap.pl/sites/default/files/styles/strona_glowna_slider_750x420/public/202005/portretProboscis_monkey_%28Nasalis_larvatus%29_male_head_0.jpg?itok=4nPIZ3jj" style="float:none;"> "';
-	///Przykład użycia SELECT
+	// echo "Connected successfully<br>";
+	// echo '<a href="https://www.youtube.com/watch?v=73T5NVNb7lE">TU, OBOWIĄZKOWO SPRAWDZIĆ</a>';
+	// echo '<img src="https://naukawpolsce.pap.pl/sites/default/files/styles/strona_glowna_slider_750x420/public/202005/portretProboscis_monkey_%28Nasalis_larvatus%29_male_head_0.jpg?itok=4nPIZ3jj" style="float:none;"> ';
+    
+    
+    ///Przykład użycia SELECT
 	/*$sql = "SELECT * FROM books";
 
 	$result = $conn->query($sql);
@@ -69,12 +71,7 @@
         <?php
         //biblioteka do zczytywania stron
         include 'simple_html_dom.php';
-        $categories = ["MAT","TEMATYKA DOWOLNA","TO BY NIC NIE DAŁO"];
         
-        function insert()
-        {
-            
-        }
 
         function displayResults($title,$pageNumber)
         {
@@ -127,18 +124,20 @@
                 </span><br>';
                 echo '</div><hr>';
             }
-            echo'<datalist id="categories">';
-                    foreach($GLOBALS['categories'] as $cat)
+                if($queryResult = $_SESSION["baza"]->query('SELECT `name` FROM `categories` ORDER BY 1;'))
+                {
+                    echo'<datalist id="categories">';
+                    while($row = $queryResult->fetch_assoc())
                     {
-                        echo '<option value="'.$cat.'">';        
+                        echo '<option value="'.$row["name"].'">';
                     }
-                echo '
-                    <option value="IT">
-                    <option value="MURARSTWO">
-                    <option value="MATEMATYKA">
-                    <option value="MALARSTWO">
-                    <option value="GRAFY">
-                </datalist>';
+                    echo '</datalist>';
+                }
+                else
+                {
+                    echo 'Database connection error!<br>';
+                }
+                
         }
         
         function numberOfPages($title)
@@ -151,46 +150,53 @@
             $results = strip_tags(file_get_html('https://pp-hip.pfsl.poznan.pl/ipac20/ipac.jsp?index=.GW&term='.$title.'&page=1')
                                  ->find('body table.tableBackground a.normalBlackFont2')[0]
                                  ->children(0));
-            echo 'Results: '.$results.'<br>';
+            echo '<p class="results">Results: '.$results.'</p>';
             /*
                 jako, że przypada po 10 pozycji na strone, na podstawie liczby wyników obliczamy liczbę stron
                 $number         luczba stron
             */
             $number = $results%10 > 0 ? ($results/10)+1 : $results/10;
             settype($number,"integer");
-            echo 'Pages: '.$number.'<br><br>';
+            echo '<p class="results">Pages: '.$number.'</p>';
 
             return $number;
         }
 
-        function titleDetails()
+        function display()
         {
-            
-        }
-        
-        $title = @$_GET['title'];
-        //$title = str_replace(" ","+",$title);
-        //echo $title.'<br>';
-        /*if(@$_GET['pages']!==null)
-        {
-            echo @$_GET['pages'].'<br>';
-        }*/
-        
-        if(!empty($title))
-        {
-            echo '<h2>Searching: '.$title.'</h2><br>';
-            $number_of_pages = numberOfPages(str_replace(" ","+",$title));
-            
-            //wyświetlamy pozycje z każdej strony wyszukiwania
-            for($i=1;$i<=$number_of_pages;$i++)
+            $number_of_pages = 0;
+            echo '<div id="mainPanel">';
+            if(!empty(@$_GET['title'])) 
             {
-                displayResults(str_replace(" ","+",$title),$i);
+                echo '<h2 class="searching">Searching: '.@$_GET['title'].'</h2>';
+                $number_of_pages = numberOfPages(str_replace(" ","+",$_GET['title']));
+            }
+            else
+            {
+                echo '<h2 class="searching">Brak wyszukiwania</h2>';
+            }
+
+            echo '<hr></div>';
+            $title = @$_GET['title'];
+            
+            if(!empty($title))
+            {
+                // echo '<h2>Searching: '.$title.'</h2><br>';
+                
+                
+                //wyświetlamy pozycje z każdej strony wyszukiwania
+                for($i=1;$i<=$number_of_pages;$i++)
+                {
+                    displayResults(str_replace(" ","+",$title),$i);
+                }
             }
         }
-        else
-        {
-            echo '<h2>Brak wyszukiwania</h2><br>';
-        }
+        
+        
+
+
+        display();
+        
         
         
         ?>
