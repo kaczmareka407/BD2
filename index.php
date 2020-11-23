@@ -115,13 +115,21 @@
 		echo '
 		<div id="menu">To jest kontener na menu<br><br><br><br></div>
         ';
-        
-        function debug_to_console($data) {
-            $output = $data;
-            if (is_array($output))
-                $output = implode(',', $output);
-        
-            echo "<script>console.log('Debug Objects: " . $output . "' );</script>";
+
+        function multiexplode ($delimiters,$string) {
+            $ready = str_replace($delimiters, $delimiters[0], $string);
+            $launch = explode($delimiters[0], $ready);
+            return  $launch;
+        }
+
+        function convert2bibtex($title, $author, $publisher, $year){
+            //$author_cale_te = explode(" ", $author);
+            $author_cale_te = multiexplode(array(" ", ","), $author);
+            $citekey = $author_cale_te[1].$year;
+            $bibtex = "@Book{".$citekey.", title = \"".$title."\", "
+                ."author = \"".$author."\", publisher = \"".$publisher."\", "
+                ."year = ".$year."}";
+            return $bibtex;
         }
 
         function displayResults($title,$pageNumber)
@@ -164,12 +172,13 @@
 				//check for books in database
 				$author = str_replace("Autor: ","",strip_tags($elem[2]));
 				$sql = 'SELECT * FROM books WHERE title LIKE "'.strip_tags($elem[1]).'" AND author LIKE "'.$author.'" AND publisher LIKE "'.strip_tags($elem[3]).'"';
-                //debug_to_console("@Book{"."dupa"."author = ".strip_tags($elem[2]));
+                
+                
                 $wydawca_cale_te = explode(', ', strip_tags($elem[3]));
-                //echo($wydawca_cale_te[0]."dupa".$wydawca_cale_te[1]);
-                echo(count($elem));
-                echo("@Book{"."dupa,\r\n"."author = ".$author.",\ntitle = ".strip_tags($elem[1]).",\npublisher = ".$wydawca_cale_te[0].",\nyear = ".$wydawca_cale_te[1].",");
-				$result = $_SESSION["baza"]->query($sql);//wczytanie wyniku zapytania
+                echo(convert2bibtex(strip_tags($elem[1]), $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));
+                
+
+                $result = $_SESSION["baza"]->query($sql);//wczytanie wyniku zapytania
 				
 				//select color (red or green)
 				if ($result->num_rows > 0)echo '<div class="result'.$i.'" style="border: 4px; border-color: green; border-style: solid;">';
