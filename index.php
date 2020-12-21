@@ -39,8 +39,8 @@
 	session_start();
 	
 	$servername = "localhost";
-	$username = "testoviron";
-	$password = "testo";
+	$username = "admin";
+	$password = "admin";
 	$dbname = "bibtex_db";
 
 	$conn = new mysqli($servername, $username, $password, $dbname);
@@ -105,15 +105,93 @@
 <html>
     <head>
         <title>Bibtex database</title>
+        <script>
+                function countSelected()
+                {
+                    var tab = [];
+
+                    var x = document.getElementsByClassName('addMultiple');
+                    console.log(x.length);
+                    for(var i = 1;i < x.length;i++)
+                    {
+                        if(x[i].checked==true)
+                        {
+                            tab.push(parseInt(i));
+                        }
+                        console.log(x[i].checked);
+                    }
+                    console.log(tab);
+                    document.getElementById('insertResult').innerHTML = tab;
+                    console.log(x[1]);
+                }
+
+                function setView()
+                {
+                    var all = document.getElementsByClassName('addMultiple');
+                    for (var i = 0; i < all.length; i++) 
+                    {
+                        all[i].style.visibility = "hidden";
+                    }
+                }
+
+                function switchAdd()
+                {
+                    var x = document.getElementById('menuSelectButton');
+                    y = parseInt(x.value)+1;
+                    x.value = y%2;
+                    switch(parseInt(x.value))
+                    {
+                        case 0:
+                        x.innerText = "single";
+                        console.log("single");
+
+                        var multiple = document.getElementsByClassName('addMultiple');
+                        var single = document.getElementsByClassName('addSingle');
+
+                        for (var i = 0; i < multiple.length; i++) 
+                        {
+                            multiple[i].style.visibility = "hidden";
+                        }
+                        for (var i = 0; i < single.length; i++) 
+                        {
+                            single[i].style.visibility = "visible";
+                        }
+                        break;
+
+                        case 1:
+                        x.innerText = "multiple";
+                        console.log("multiple");
+
+                        var single = document.getElementsByClassName('addSingle');
+                        var multiple = document.getElementsByClassName('addMultiple');
+
+                        for (var i = 0; i < multiple.length; i++) 
+                        {
+                            multiple[i].style.visibility = "visible";
+                        }
+                        for (var i = 0; i < single.length; i++) 
+                        {
+                            single[i].style.visibility = "hidden";
+                        }
+                        break;
+                    }
+                }
+        </script>
     </head>
-    <body>
+    <body onload="setView()">
         <?php
         //biblioteka do zczytywania stron
         include 'simple_html_dom.php';
         
 		//wyrysuj nieruchome menu
 		echo '
-		<div id="menu">To jest kontener na menu<br><br><br><br></div>
+        <div id="menu">To jest kontener na menu<br>
+            <button id="menuSelectButton" onclick="switchAdd()" value="0">Single</button>
+        <br>
+            <button class="addMultiple" onclick="countSelected()">Dodaj zaznaczone</button>
+        <br>
+            <span id="insertResult"></span>
+        <br></div>
         ';
 
         function multiexplode ($delimiters,$string) {
@@ -181,8 +259,8 @@
                 $result = $_SESSION["baza"]->query($sql);//wczytanie wyniku zapytania
 				
 				//select color (red or green)
-				if ($result->num_rows > 0)echo '<div class="result'.$i.'" style="border: 4px; border-color: green; border-style: solid;">';
-				else echo '<div class="result'.$i.'" style="border: 4px; border-color: red; border-style: solid;">';
+				if ($result->num_rows > 0)echo '<div class="result'.($i+1).'" style="border: 4px; border-color: green; border-style: solid;">';
+				else echo '<div class="result'.($i+1).'" style="border: 4px; border-color: red; border-style: solid;">';
 				echo (($i+1)+(10*($pageNumber-1))).'  ';
 				
                 for($j=1;$j<4;$j++)
@@ -197,8 +275,8 @@
                 }
                 echo '<span>
                 <button onclick="">Check</button>
-                <button onclick="">Add to database</button>
-                Chose category: <input type="text" list="categories"><br><input type="checkbox" class="ptak">                
+                <button class="addSingle" onclick="">Add to database</button>
+                Chose category: <input type="text" list="categories"><br><input class="addMultiple" type="checkbox" class="ptak">                
                 </span><br>';
                 echo '</div>';
             }

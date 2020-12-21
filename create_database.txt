@@ -19,6 +19,22 @@ CREATE TABLE BOOKS(
     FOREIGN KEY fk_cat(`category`) REFERENCES CATEGORIES(categoryID)
 );
 
+CREATE TABLE TAGS(
+	`ID` int NOT NULL AUTO_INCREMENT,
+	`tagName` varchar(255) NOT NULL,
+	PRIMARY KEY(`ID`)
+);
+
+CREATE TABLE BOOK_RESOURCES(
+	`ID` int NOT NULL AUTO_INCREMENT,
+	`bookID` int NOT NULL,
+	`tagID` int NOT NULL,
+	`link` varchar(255) NOT NULL,
+	PRIMARY KEY(`ID`),
+	FOREIGN KEY fk_tag(`tagID`) REFERENCES TAGS(ID),
+	FOREIGN KEY fk_bookid(`bookID`) REFERENCES BOOKS(ID)
+);
+
 
 INSERT INTO `categories` 
 (`categoryID`, `name`) 
