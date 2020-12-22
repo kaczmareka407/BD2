@@ -210,6 +210,18 @@
             return $bibtex;
         }
 
+        function convert2form($title, $author, $publisher, $year)
+        {
+            $author_cale_te = multiexplode(array(" ", ","), $author);
+            $citekey = $author_cale_te[1].$year;
+            $bibtex = '<span name ="'.$citekey.'"></span>
+                <span name="title">'.$title.'</span><br>
+                <span name="author">'.$author.'</span><br>
+                <span name="publisher">'.$publisher.'</span>
+                <span name="year">'.$year.'</span><br>';
+            return $bibtex;
+        }
+
         function displayResults($title,$pageNumber)
         {
             /*
@@ -261,22 +273,29 @@
 				//select color (red or green)
 				if ($result->num_rows > 0)echo '<div class="result'.($i+1).'" style="border: 4px; border-color: green; border-style: solid;">';
 				else echo '<div class="result'.($i+1).'" style="border: 4px; border-color: red; border-style: solid;">';
-				echo (($i+1)+(10*($pageNumber-1))).'  ';
-				
+                echo (($i+1)+(10*($pageNumber-1))).'  ';
+                
+                //wyswietlanie do formularza
+                //
+                //  E WĄSATY WSIURZE TUTAJ FORMULARZ DO DODAWANIA DO BAZY JUŻ
+                //
+                echo(convert2form(strip_tags($elem[1]), $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));
+                
+
                 for($j=1;$j<4;$j++)
                 {
                     $temp_res = strip_tags($elem[$j]);
                     if(strlen($temp_res)>5)
                     {
 						
-                        echo '<span id="'.$j.'" quantity="'.strlen($temp_res).'">'.$temp_res.'</span><br>';
+                        // echo '<span id="'.$j.'" quantity="'.strlen($temp_res).'">'.$temp_res.'</span><br>';
 
                     }
                 }
-                echo '<span>
-                <button onclick="">Check</button>
+                echo '<span>'/*
+                <button onclick="">Check</button>*/.'
                 <button class="addSingle" onclick="">Add to database</button>
-                Chose category: <input type="text" list="categories"><br><input class="addMultiple" type="checkbox" class="ptak">                
+                Chose category: <input name="categories" type="text" list="categories"><br><input class="addMultiple" type="checkbox" class="ptak">                
                 </span><br>';
                 echo '</div>';
             }
