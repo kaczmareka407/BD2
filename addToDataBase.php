@@ -1,12 +1,29 @@
 <?php
     session_start();
-    $_SESSION["baza"] = $conn;
+    include("connect_to_database.php");
+	if(!$conn->ping())echo "NOT CONNECTED";
 
-    /*'<span name ="'.$citekey.'"></span>
-    <span name="title">'.$title.'</span><br>
-    <span name="author">'.$author.'</span><br>
-    <span name="publisher">'.$publisher.'</span>
-    <span name="year">'.$year.'</span><br>';*/
+	foreach($_POST as $x)
+	{
+		echo $x.'<br>';
+	}
+	$title = $_POST['title'];
+	$author = $_POST['author'];
+	$publisher = $_POST['publisher'];
+	$year = $_POST['year'];
+	$category = 3;//$_POST['categories'];
 
-    $_POST['citekey']
+			if($stmt = $conn->prepare("INSERT INTO books (title, author, publisher, year, category) VALUES (?, ?, ?, ?, ?)"))
+			{
+				//sssii znaczy string*3 int*2 - inne: d-double, b-BLOB
+				$stmt->bind_param("sssii", $title, $author, $publisher, $year, $category);
+				$stmt->execute();
+			}
+			else
+			{
+				printf("Error: %s.\n", $stmt->error);
+			}
+    echo
+	'<script>history.go(-1);</script>'
+	;
 ?>

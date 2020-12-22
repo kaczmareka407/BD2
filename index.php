@@ -1,9 +1,4 @@
-<!--
-
-	--TODO: Wczytywanie wierszy z bazy dla piela
-	--TODO: Sprawdzenie czy jest w bazie książka
-	--TODO: Nieruchome menu
-	
+<!--	
 	Agata:
 	TODO: Przycisk "zaznacz wiele" - zmienia widoczność checkboxa i przycisku zapisz
 	TODO: po zaznaczeniu checkboxa pojawia się "choose category"
@@ -37,67 +32,6 @@
 
 <?php
 	session_start();
-	
-	$servername = "localhost";
-	$username = "admin";
-	$password = "admin";
-	$dbname = "bibtex_db";
-
-	$conn = new mysqli($servername, $username, $password, $dbname);
-	if ($conn->connect_error) 
-	{
-		die("Connection failed: " . $conn->connect_error);
-	}
-    
-    ///Przykład użycia SELECT dla Magosa Ioannesa Pielusa
-	/*
-	
-	$sql = "SELECT * FROM books"; //zapytanie
-
-	$result = $conn->query($sql);//wczytanie wyniku zapytania
-	
-	if ($result->num_rows > 0) //jeżeli zapytanie zwróciło więcej niż 0 wierszy
-	{
-		while($row = $result->fetch_assoc()) //do $row przypisujemy kolejny wiersz, po prostu to sobie skopiujcie
-		{
-			echo "id: " . $row["ID"]. " - title: " . $row["title"]. " author: " . $row["author"]. "<br>";
-			
-			//$row["nazwa_kolumny"] - pod tym siedzi to co jest w wierszu pod danym polem
-			//$row traktujemy jak mapę
-		}
-	} 
-	else
-	{
-		echo "0 results";
-	}
-
-	 //zakończ połączenie z bazą
-	
-	*/
-	
-	///INSERT do bazy dla Magosa Ballusa
-	/*
-		$conn = $_SESSION["baza"];
-				if($stmt = $conn->prepare("INSERT INTO books (title, author, publisher, year, category) VALUES (?, ?, ?, ?, ?)"))
-				{
-					//sssii znaczy string*3 int*2 - inne: d-double, b-BLOB
-					$stmt->bind_param("sssii", $title, $author, $publisher, $year, $cat);
-					$title = "grafy";
-					$author = "zwierz";
-					$publisher = "poli";
-					$year = 2137;
-					$cat = 3;
-					$stmt->execute();
-				}
-				else
-				{
-					echo "nie można dodać do bazy bo tak";
-				}
-				
-	*/
-	
-	
-	$_SESSION["baza"] = $conn; //tutaj jest baza i jest dostępna cały czas w trakcie działania sesji
 ?>
 
 
@@ -218,7 +152,13 @@
                 <span name="title">'.$title.'</span><br>
                 <span name="author">'.$author.'</span><br>
                 <span name="publisher">'.$publisher.'</span>
-                <span name="year">'.$year.'</span><br>';
+                <span name="year">'.$year.'</span><br>
+				<input type="hidden" name="title" value="'.$title.'">
+				<input type="hidden" name="author" value="'.$author.'">
+				<input type="hidden" name="publisher" value="'.$publisher.'">
+				<input type="hidden" name="year" value="'.$year.'">
+				'
+				;
             return $bibtex;
         }
 
@@ -261,22 +201,42 @@
 				*/
 				//check for books in database
 				$author = str_replace("Autor: ","",strip_tags($elem[2]));
-				$sql = 'SELECT * FROM books WHERE title LIKE "'.strip_tags($elem[1]).'" AND author LIKE "'.$author.'" AND publisher LIKE "'.strip_tags($elem[3]).'"';
-                
-                
-                $wydawca_cale_te = explode(', ', strip_tags($elem[3]));
-                echo(convert2bibtex(strip_tags($elem[1]), $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));
-                
-
-                $result = $_SESSION["baza"]->query($sql);//wczytanie wyniku zapytania
 				
+				include("connect_to_database.php");
+				if(!$conn->ping())echo "NOT CONNECTED";
+				if(!$conn->ping())echo "---ERROR--- not ping";
+				
+				$title = strip_tags($elem[1]);
+				
+				echo 'TITLE---'.$title."---TITLE<br>";
+				if (!($stmt = $conn->prepare('SELECT * FROM books WHERE `title`LIKE ?')))
+				{
+					echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
+				}
+				if (!$stmt->bind_param("s", $title)) 
+				{
+					echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+				}
+				if (!$stmt->execute()) 
+				{
+					echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+				}
+				
+				$result = $stmt->get_result();
+				
+				$stmt->close();
+				$conn->close();
+				
+                $wydawca_cale_te = explode(', ', strip_tags($elem[3]));
+                echo (convert2bibtex(strip_tags($elem[1]), $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));             
+
 				//select color (red or green)
 				if ($result->num_rows > 0)echo '<div class="result'.($i+1).'" style="border: 4px; border-color: green; border-style: solid;">';
 				else echo '<div class="result'.($i+1).'" style="border: 4px; border-color: red; border-style: solid;">';
                 echo (($i+1)+(10*($pageNumber-1))).'  ';
                 
                 //wyswietlanie do formularza
-                echo '<form method="POST" action="addToDataBase.php>';
+                echo '<form method="POST" action="addToDataBase.php">';
                 
                 echo(convert2form(strip_tags($elem[1]), $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));
                 
@@ -301,7 +261,8 @@
                 echo '</form>';
 
             }
-                if($queryResult = $_SESSION["baza"]->query('SELECT `name` FROM `categories` ORDER BY 1;'))
+			include("connect_to_database.php");
+                if($queryResult = $conn->query('SELECT `name` FROM `categories` ORDER BY 1;'))
                 {
                     echo'<datalist id="categories">';
                     while($row = $queryResult->fetch_assoc())
@@ -314,6 +275,7 @@
                 {
                     echo 'Database connection error!<br>';
                 }
+			$conn->close();
                 
         }
         
@@ -373,9 +335,6 @@
 
 
         display();
-        
-        
-        $conn->close();
         ?>
         
     </body>

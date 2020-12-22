@@ -13,7 +13,7 @@ CREATE TABLE BOOKS(
     `title` varchar(255) NOT NULL,
     `author` varchar(255) NOT NULL DEFAULT 'n/a',
     `publisher` varchar(255) NOT NULL DEFAULT 'n/a',
-    `year` DATE NOT NULL,
+    `year` varchar(30) NOT NULL,
     `category` int NOT NULL,
     PRIMARY KEY(`ID`),
     FOREIGN KEY fk_cat(`category`) REFERENCES CATEGORIES(categoryID)
