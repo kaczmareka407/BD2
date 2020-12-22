@@ -276,11 +276,11 @@
                 echo (($i+1)+(10*($pageNumber-1))).'  ';
                 
                 //wyswietlanie do formularza
-                //
-                //  E WĄSATY WSIURZE TUTAJ FORMULARZ DO DODAWANIA DO BAZY JUŻ
-                //
+                echo '<form method="POST" action="addToDataBase.php>';
+                
                 echo(convert2form(strip_tags($elem[1]), $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));
                 
+
 
                 for($j=1;$j<4;$j++)
                 {
@@ -294,10 +294,12 @@
                 }
                 echo '<span>'/*
                 <button onclick="">Check</button>*/.'
-                <button class="addSingle" onclick="">Add to database</button>
+                <input type="submit" class="addSingle" onclick="" value="Add to database">
                 Chose category: <input name="categories" type="text" list="categories"><br><input class="addMultiple" type="checkbox" class="ptak">                
                 </span><br>';
                 echo '</div>';
+                echo '</form>';
+
             }
                 if($queryResult = $_SESSION["baza"]->query('SELECT `name` FROM `categories` ORDER BY 1;'))
                 {
