@@ -11,12 +11,14 @@
 	$author = $_POST['author'];
 	$publisher = $_POST['publisher'];
 	$year = $_POST['year'];
-	$category = 3;//$_POST['categories'];
+	$category = 3;
+	// $category = $_POST['category'];
+
 
 			if($stmt = $conn->prepare("INSERT INTO books (title, author, publisher, year, category) VALUES (?, ?, ?, ?, ?)"))
 			{
 				//sssii znaczy string*3 int*2 - inne: d-double, b-BLOB
-				$stmt->bind_param("sssii", $title, $author, $publisher, $year, $category);
+				$stmt->bind_param("sssis", $title, $author, $publisher, $year, $category);
 				$stmt->execute();
 			}
 			else

@@ -31,13 +31,17 @@
 </style>
 
 <?php
-	session_start();
+    session_start();
+    mb_internal_encoding("UTF-8");
+    mb_http_output( "UTF-8" );
 ?>
 
 
 <!DOCTYPE HTML>
 <html>
     <head>
+    <meta http-equiv="Content-Language" content="text/html; charset=UTF-8" >
+    <meta charset="UTF-8" >
         <title>Bibtex database</title>
         <script>
                 function countSelected()
@@ -114,6 +118,11 @@
     </head>
     <body onload="setView()">
         <?php
+mb_internal_encoding('UTF-8');
+mb_http_output('UTF-8');
+mb_http_input('UTF-8');
+mb_regex_encoding('UTF-8'); 
+
         //biblioteka do zczytywania stron
         include 'simple_html_dom.php';
         
@@ -141,7 +150,7 @@
             $bibtex = "@Book{".$citekey.", title = \"".$title."\", "
                 ."author = \"".$author."\", publisher = \"".$publisher."\", "
                 ."year = ".$year."}";
-            return $bibtex;
+            return '<span style="display:none">'.$bibtex.'</span>';
         }
 
         function convert2form($title, $author, $publisher, $year)
@@ -160,6 +169,49 @@
 				'
 				;
             return $bibtex;
+        }
+
+        function convert2insert($title, $author, $publisher, $year)
+        {
+            $author_cale_te = multiexplode(array(" ", ","), $author);
+            $citekey = $author_cale_te[1].$year;
+            /*$title = str_replace("&nbsp;"," ",$title);
+            $author = str_replace("&nbsp;"," ",$author);
+            $publihser = str_replace("&nbsp;"," ",$publisher);
+            $year = str_replace("&nbsp;"," ",$year);*/
+
+            /* $bibtex = '<span name ="'.$citekey.'"></span>
+                <span name="title">'.str_replace("&nbsp;"," ",$title).'</span><br>
+                <span name="author">'.str_replace("&nbsp;"," ",$author).'</span><br>
+                <span name="publisher">'.str_replace("&nbsp;"," ",$publisher).'</span>
+                <span name="year">'.str_replace("&nbsp;"," ",$year).'</span><br>
+				<input type="hidden" name="title" value="'.str_replace("&nbsp;"," ",$title).'">
+				<input type="hidden" name="author" value="'.str_replace("&nbsp;"," ",$author).'">
+				<input type="hidden" name="publisher" value="'.str_replace("&nbsp;"," ",$publisher).'">
+				<input type="hidden" name="year" value="'.str_replace("&nbsp;"," ",$year).'">
+				'
+                ; */
+            $bibtex = '<span name ="'.$citekey.'"></span>
+            <span name="title">'.$title.'</span><br>
+            <span name="author">'.$author.'</span><br>
+            <span name="publisher">'.$publisher.'</span>
+            <span name="year">'.$year.'</span><br>
+            <input type="hidden" name="title" value="'.$title.'">
+            <input type="hidden" name="author" value="'.$author.'">
+            <input type="hidden" name="publisher" value="'.$publisher.'">
+            <input type="hidden" name="year" value="'.$year.'">
+            '
+            ;
+            return $bibtex;
+            /*for($i = 0,$i<4, $i++)
+            {
+
+            }
+            for($array as $element)
+            {
+                $element = str_replace("&nbsp"," ",$element);
+            }*/
+            
         }
 
         function displayResults($title,$pageNumber)
@@ -205,40 +257,55 @@
 				include("connect_to_database.php");
 				if(!$conn->ping())echo "NOT CONNECTED";
 				if(!$conn->ping())echo "---ERROR--- not ping";
-				
-				$title = strip_tags($elem[1]);
-				
-				echo 'TITLE---'.$title."---TITLE<br>";
-				if (!($stmt = $conn->prepare('SELECT * FROM books WHERE `title`LIKE ?')))
-				{
-					echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
-				}
-				if (!$stmt->bind_param("s", $title)) 
-				{
-					echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
-				}
-				if (!$stmt->execute()) 
-				{
-					echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
-				}
-				
-				$result = $stmt->get_result();
-				
-				$stmt->close();
-				$conn->close();
+
+                
+                $title = html_entity_decode($title);
+                // echo $title;
+
+
+                $test = "Projektowanie algorytmów grafowych / Krystyna Balińska, Krzysztof T. Zwierzyński. ";
+
+                
 				
                 $wydawca_cale_te = explode(', ', strip_tags($elem[3]));
-                echo (convert2bibtex(strip_tags($elem[1]), $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));             
+                $title = html_entity_decode(strip_tags($elem[1]));
+                echo (convert2bibtex($title, $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));
+                
+                $yr = substr($wydawca_cale_te[1], 0, -1);
+				// echo 'TITLE---'.$title."---TITLE<br>";
 
-				//select color (red or green)
-				if ($result->num_rows > 0)echo '<div class="result'.($i+1).'" style="border: 4px; border-color: green; border-style: solid;">';
-				else echo '<div class="result'.($i+1).'" style="border: 4px; border-color: red; border-style: solid;">';
+                //echo (convert2bibtex(strip_tags($elem[1]), $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));
+                
+				if (!($stmt = $conn->prepare('SELECT * FROM books WHERE `title` LIKE ? AND `year` LIKE ?')))
+				{
+                    echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
+                }
+                
+				if (!$stmt->bind_param("si", $title,$yr)) 
+				{
+                    echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+                }
+                
+				if (!$stmt->execute()) 
+				{
+                    echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+                }
+                
+                
+                $result = $stmt->get_result();
+                
+                $stmt->close();
+                $conn->close();
+				//select color (red or green)usu
+                //wyswietlanie do formularza
+                if ($result->num_rows > 0)echo '<form method="POST" action="delete.php">'./*                                                                                USUWANIE Z BAZY DODAĆ ! ! ! */'
+                
+                <div class="result'.($i+1).'" style="border: 4px; border-color: green; border-style: solid;">';
+				else echo '<form method="POST" action="addToDataBase.php"><div class="result'.($i+1).'" style="border: 4px; border-color: red; border-style: solid;">';
                 echo (($i+1)+(10*($pageNumber-1))).'  ';
                 
-                //wyswietlanie do formularza
-                echo '<form method="POST" action="addToDataBase.php">';
                 
-                echo(convert2form(strip_tags($elem[1]), $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));
+                echo(convert2insert(strip_tags($elem[1]), $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));
                 
 
 
@@ -252,12 +319,29 @@
 
                     }
                 }
-                echo '<span>'/*
-                <button onclick="">Check</button>*/.'
-                <input type="submit" class="addSingle" onclick="" value="Add to database">
-                Chose category: <input name="categories" type="text" list="categories"><br><input class="addMultiple" type="checkbox" class="ptak">                
-                </span><br>';
-                echo '</div>';
+
+                if ($result->num_rows == 0)
+                {
+                    echo '<span>Chose category: 
+                    <input name="category" type="text" list="categories">
+                    <br>
+                    <input type="submit" class="addSingle" value="Add to database">';
+                }
+                else
+                {
+                    echo '<span>Resource name:
+                    <input name="tagName" type="text">
+
+                    Link: <input name="link" type="text">
+                    <br>
+                    <input type="submit" value="Add book resource">
+                    <input type="submit" class="delete_record" value="Delete from database">';
+                }
+                // echo '<span>
+                // Chose category: <input name="category" type="text" list="categories"><br><input class="addMultiple" type="checkbox" class="ptak">';                
+                // if ($result->num_rows == 0) echo '<input type="submit" class="addSingle" value="Add to database">';
+                // else echo '<input type="submit" class="delete_record" value="Delete from database">';
+                echo '</span><br></div>';
                 echo '</form>';
 
             }
