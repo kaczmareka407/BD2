@@ -143,6 +143,62 @@ mb_regex_encoding('UTF-8');
             return  $launch;
         }
 
+        class Book {
+            private $title;
+            private $author;
+            private $publisher;
+            private $year;
+            private $citekey;
+
+            function __construct($title_arg, $author_arg, $publisher_arg, $year_arg, $citekey_arg){
+                $title = $title_arg; 
+                $author = $author_arg;
+                $publisher = $publisher_arg;
+                $year = $year_arg;
+                $citekey = $citekey_arg;
+            }
+
+            function get_title() { 
+                return $title; 
+            } 
+            function get_author() { 
+                return $author; 
+            } 
+            function get_publisher() { 
+                return $publisher; 
+            } 
+            function get_year() { 
+                return $year; 
+            } 
+            function get_citekey() { 
+                return $citekey; 
+            } 
+
+            function get_bibtex() {
+                $bibtex = "@Book{".$citekey.", title = \"".$title."\", "
+                    ."author = \"".$author."\", publisher = \"".$publisher."\", "
+                    ."year = ".$year."}";
+                return $bibtex;
+            }
+
+            function set_title($title_arg) { 
+                $title = $title_arg; 
+            } 
+            function set_author($author_arg) { 
+                $author = $author_arg;
+            } 
+            function set_publisher($publisher_arg) { 
+                $publisher = $publisher_arg;
+            } 
+            function set_year($year_arg) { 
+                $year = $year_arg;
+            } 
+            function set_citekey($citekey_arg) { 
+                $citekey = $citekey_arg;
+            } 
+
+        };
+
         function convert2bibtex($title, $author, $publisher, $year){
             //$author_cale_te = explode(" ", $author);
             $author_cale_te = multiexplode(array(" ", ","), $author);
@@ -151,6 +207,26 @@ mb_regex_encoding('UTF-8');
                 ."author = \"".$author."\", publisher = \"".$publisher."\", "
                 ."year = ".$year."}";
             return '<span style="display:none">'.$bibtex.'</span>';
+        }
+
+        function convert2Book($title, $author, $publisher, $year){
+            $author_cale_te = multiexplode(array(" ", ","), $author);
+            $citekey = $author_cale_te[1].$year;
+            $book = new Book($title, $author, $publiher, $year, $citekey);
+            return $book;
+        }
+
+        function convert2bibtexFile($books){ //books = array2D([0]-title, [1]-author, [2]-publisher, [3]-year)
+            $file_string = "";
+            foreach($books as &$value){
+                $book = convert2Book($value[0], $value[1], $value[2], $value[3]);
+                $file_string .= $book->get_bibtex();
+                $file_string .= "\n";
+            }
+            $myfile = fopen("newfile.txt", "w") or die("Unable to open file!");
+            fwrite($myfile, $file_string);
+            
+            //return '<span style="display:none">'.$bibtex.'</span>';
         }
 
         function convert2form($title, $author, $publisher, $year)
@@ -269,9 +345,9 @@ mb_regex_encoding('UTF-8');
 				
                 $wydawca_cale_te = explode(', ', strip_tags($elem[3]));
                 $title = html_entity_decode(strip_tags($elem[1]));
-                echo (convert2bibtex($title, $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));
+                echo (@convert2bibtex($title, $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));
                 
-                $yr = substr($wydawca_cale_te[1], 0, -1);
+                $yr = @substr($wydawca_cale_te[1], 0, -1);
 				// echo 'TITLE---'.$title."---TITLE<br>";
 
                 //echo (convert2bibtex(strip_tags($elem[1]), $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));
@@ -305,7 +381,7 @@ mb_regex_encoding('UTF-8');
                 echo (($i+1)+(10*($pageNumber-1))).'  ';
                 
                 
-                echo(convert2insert(strip_tags($elem[1]), $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));
+                echo(@convert2insert(strip_tags($elem[1]), $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));
                 
 
 
