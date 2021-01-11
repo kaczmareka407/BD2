@@ -144,57 +144,57 @@ mb_regex_encoding('UTF-8');
         }
 
         class Book {
-            private $title;
-            private $author;
-            private $publisher;
-            private $year;
-            private $citekey;
+            private $title = "";
+            private $author = "";
+            private $publisher = "";
+            private $year = "";
+            private $citekey = "";
 
             function __construct($title_arg, $author_arg, $publisher_arg, $year_arg, $citekey_arg){
-                $title = $title_arg; 
-                $author = $author_arg;
-                $publisher = $publisher_arg;
-                $year = $year_arg;
-                $citekey = $citekey_arg;
+                $this->title = $title_arg; 
+                $this->author = $author_arg;
+                $this->publisher = $publisher_arg;
+                $this->year = $year_arg;
+                $this->citekey = $citekey_arg;
             }
 
             function get_title() { 
-                return $title; 
+                return $this->title; 
             } 
             function get_author() { 
-                return $author; 
+                return $this->author; 
             } 
             function get_publisher() { 
-                return $publisher; 
+                return $this->publisher; 
             } 
             function get_year() { 
-                return $year; 
+                return $this->year; 
             } 
             function get_citekey() { 
-                return $citekey; 
+                return $this->citekey; 
             } 
 
             function get_bibtex() {
-                $bibtex = "@Book{".$citekey.", title = \"".$title."\", "
-                    ."author = \"".$author."\", publisher = \"".$publisher."\", "
-                    ."year = ".$year."}";
+                $bibtex = "@Book{".$this->citekey.", title = \"".$this->title."\", "
+                    ."author = \"".$this->author."\", publisher = \"".$this->publisher."\", "
+                    ."year = ".$this->year."}";
                 return $bibtex;
             }
 
             function set_title($title_arg) { 
-                $title = $title_arg; 
+                $this->title = $title_arg; 
             } 
             function set_author($author_arg) { 
-                $author = $author_arg;
+                $this->author = $author_arg;
             } 
             function set_publisher($publisher_arg) { 
-                $publisher = $publisher_arg;
+                $this->publisher = $publisher_arg;
             } 
             function set_year($year_arg) { 
-                $year = $year_arg;
+                $this->year = $year_arg;
             } 
             function set_citekey($citekey_arg) { 
-                $citekey = $citekey_arg;
+                $this->citekey = $citekey_arg;
             } 
 
         };
@@ -210,21 +210,41 @@ mb_regex_encoding('UTF-8');
         }
 
         function convert2Book($title, $author, $publisher, $year){
+            //echo($author);
             $author_cale_te = multiexplode(array(" ", ","), $author);
             $citekey = $author_cale_te[1].$year;
-            $book = new Book($title, $author, $publiher, $year, $citekey);
+            //echo($author_cale_te);
+            //$citekey = "";
+            $book = new Book($title, $author, $publisher, $year, $citekey);
             return $book;
         }
 
-        function convert2bibtexFile($books){ //books = array2D([0]-title, [1]-author, [2]-publisher, [3]-year)
+        function convert2bibtexFile($books){ //books = array(array([0]-title, [1]-author, [2]-publisher, [3]-year), ...)
             $file_string = "";
+            //print_r($books);
             foreach($books as &$value){
                 $book = convert2Book($value[0], $value[1], $value[2], $value[3]);
                 $file_string .= $book->get_bibtex();
                 $file_string .= "\n";
             }
-            $myfile = fopen("newfile.txt", "w") or die("Unable to open file!");
-            fwrite($myfile, $file_string);
+            echo($file_string);
+
+            //$myfile = fopen("newfile.txt", "w") or die("Unable to open file!");
+            //fwrite($myfile, $file_string);
+
+            $file = "test.txt";
+            $txt = fopen($file, "w") or die("Unable to open file!");
+            fwrite($txt, "lorem ipsum");
+            fclose($txt);
+
+            header('Content-Description: File Transfer');
+            header('Content-Disposition: attachment; filename='.basename($file));
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate');
+            header('Pragma: public');
+            header('Content-Length: ' . filesize($file));
+            header("Content-Type: text/plain");
+            readfile($file);
             
             //return '<span style="display:none">'.$bibtex.'</span>';
         }
@@ -328,7 +348,8 @@ mb_regex_encoding('UTF-8');
 						
 				*/
 				//check for books in database
-				$author = str_replace("Autor: ","",strip_tags($elem[2]));
+                $author = str_replace("Autor: ","",strip_tags($elem[2]));
+                //echo($author);
 				
 				include("connect_to_database.php");
 				if(!$conn->ping())echo "NOT CONNECTED";
@@ -345,13 +366,14 @@ mb_regex_encoding('UTF-8');
 				
                 $wydawca_cale_te = explode(', ', strip_tags($elem[3]));
                 $title = html_entity_decode(strip_tags($elem[1]));
-                echo (@convert2bibtex($title, $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));
+                //echo (@convert2bibtex($title, $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));
                 
                 $yr = @substr($wydawca_cale_te[1], 0, -1);
 				// echo 'TITLE---'.$title."---TITLE<br>";
 
                 //echo (convert2bibtex(strip_tags($elem[1]), $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1)));
-                
+                convert2bibtexFile(array(array(strip_tags($elem[1]), $author, $wydawca_cale_te[0], substr($wydawca_cale_te[1], 0, -1))));
+
 				if (!($stmt = $conn->prepare('SELECT * FROM books WHERE `title` LIKE ? AND `year` LIKE ?')))
 				{
                     echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
