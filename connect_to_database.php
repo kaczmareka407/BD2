@@ -11,4 +11,7 @@ $servername = "localhost";
 		die("Connection failed: " . $conn->connect_error);
 	}
 	
+	if(!$conn->ping())echo "NOT CONNECTED";
+	if(!$conn->ping())echo "---ERROR--- not ping";
+	
 ?>

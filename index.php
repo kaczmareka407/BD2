@@ -310,6 +310,166 @@ mb_regex_encoding('UTF-8');
             
         }
 
+		function displayResources($book_id)
+		{
+			include("connect_to_database.php");
+			//wypisuje dostępne zasoby książki
+			if (!($stmt = $conn->prepare('SELECT * FROM book_resources WHERE bookID = ?')))
+			{
+                echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
+            }
+                
+			if (!$stmt->bind_param("i", $book_id)) 
+			{
+                echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+            }
+                
+			if (!$stmt->execute()) 
+			{
+                echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            }
+                
+                
+            $result = $stmt->get_result();
+			echo '<div style="padding-left: 2em">';
+			
+			/*Load resurce and its category*/
+			while($row = $result->fetch_assoc()) 
+			{
+				
+				if (!($stmt2 = $conn->prepare('SELECT * FROM tags WHERE ID = ?')))
+				{
+					echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
+				}
+                
+				if (!$stmt2->bind_param("i", $row['tagID'])) 
+				{
+					echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+				}
+                
+				if (!$stmt2->execute()) 
+				{
+					echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+				}
+				$result2 = $stmt2->get_result();
+				$tagname = $result2->fetch_assoc()['tagName'];
+				
+
+				echo '<i>' . $tagname."  <a href=". $row['link'].">" . $row['link']. "</a></i><br>";
+			}
+			
+			/*Get all categories*/
+			if (!($stmt3 = $conn->prepare('SELECT tagName FROM tags')))
+				{
+					echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
+				}
+				
+				if (!$stmt3->execute()) 
+				{
+					echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+				}
+				$result3 = $stmt3->get_result();
+				
+			$categories = array();	
+			while($row = $result3->fetch_assoc())
+			{
+				array_push($categories,$row['tagName']);
+			}			
+			
+			echo
+			'
+			<script>
+				function showAddButton() 
+				{
+					var x = document.getElementById("bookResourcesAddButton'.$book_id.'");
+					var y = document.getElementsByClassName("bookResourcesForm'.$book_id.'");
+					if (x.style.display === "none") 
+					{
+						x.style.display = "inline";
+					} 
+					else 
+					{
+						x.style.display = "none";
+					}
+					if (x.style.display === "none") 
+					{
+						for(var i=0;i<y.length;i++)
+						{
+							y[i].style.display = "inline";
+						}
+						y.nextSibling.style.display = "inline";
+					} 
+					else 
+					{
+						for(var i=0;i<y.length;i++)
+						{
+							y[i].style.display = "none";
+						}
+						
+						y.nextSibling.style.display = "none";
+					}
+				}
+			
+			</script>
+			';
+			
+			/*Save button, styled as link*/
+			echo '<button type="button" onclick="showAddButton()" id="bookResourcesAddButton'.$book_id.'"
+			style="
+			
+			
+			align-items: normal;
+			background-color: rgba(0,0,0,0);
+			border-color: rgb(0, 0, 238);
+			border-style: none;
+			box-sizing: content-box;
+			color: rgb(0, 0, 238); 
+			cursor: pointer;
+			display: inline;
+			font: inherit;
+			height: auto;
+			padding: 0;
+			perspective-origin: 0 0;
+			text-align: start;
+			text-decoration: underline;
+			transform-origin: 0 0;
+			width: auto;
+			-moz-appearance: none;
+			-webkit-logical-height: 1em; /* Chrome ignores auto, so we have to use this hack to set the correct height  */
+			-webkit-logical-width: auto; /* Chrome ignores auto, but here for completeness */
+			 font-style: italic;
+			
+			"
+			>Add...</button>';
+			
+			/*new resource form*/
+			echo 
+			'
+			
+			<form type=post class="bookResourcesForm'.$book_id.'" style="display:none">
+				<input type="text" placeholder="Resource name" class="bookResourcesForm'.$book_id.'" style="display:none">
+				<input type="text" placeholder="Resource link" class="bookResourcesForm'.$book_id.'" style="display:none">
+				<select name = "category" class="bookResourcesForm'.$book_id.'" style="display:none">
+				';
+				
+				echo ' <option value = "'.$categories[0].'" selected="selected">'.$categories[0].'</option> ';
+				for($i =1 ; $i < count($categories); $i++)
+				{
+					echo ' <option value = "'.$categories[$i].'">'.$categories[$i].'</option> ';
+				}	
+				
+			echo '
+				</select>
+				<input type="submit" value="Save" class="bookResourcesForm'.$book_id.'" style="display:none">
+			</form>
+			<button type="button" onclick="showAddButton()" class="bookResourcesForm'.$book_id.'" style="display:none">Cancel</button>
+			';
+			
+			echo '</div>';
+            $stmt->close();
+            $conn->close();
+		}
+
         function displayResults($title,$pageNumber)
         {
             /*
@@ -352,8 +512,7 @@ mb_regex_encoding('UTF-8');
                 //echo($author);
 				
 				include("connect_to_database.php");
-				if(!$conn->ping())echo "NOT CONNECTED";
-				if(!$conn->ping())echo "---ERROR--- not ping";
+				
 
                 
                 $title = html_entity_decode($title);
@@ -391,14 +550,22 @@ mb_regex_encoding('UTF-8');
                 
                 
                 $result = $stmt->get_result();
-                
+
                 $stmt->close();
                 $conn->close();
 				//select color (red or green)usu
                 //wyswietlanie do formularza
-                if ($result->num_rows > 0)echo '<form method="POST" action="delete.php">'./*                                                                                USUWANIE Z BAZY DODAĆ ! ! ! */'
-                
-                <div class="result'.($i+1).'" style="border: 4px; border-color: green; border-style: solid;">';
+				$in_base = false;
+                if ($result->num_rows > 0)
+				{
+					$book_id = $result->fetch_assoc()["ID"];
+					$in_base = true;
+					echo '<form method="POST" action="delete.php">'./*USUWANIE Z BAZY DODAĆ ! ! ! */
+					'<div class="result'.($i+1).'" style="border: 4px; border-color: green; border-style: solid;">
+					</form>
+					';
+		
+				}
 				else echo '<form method="POST" action="addToDataBase.php"><div class="result'.($i+1).'" style="border: 4px; border-color: red; border-style: solid;">';
                 echo (($i+1)+(10*($pageNumber-1))).'  ';
                 
@@ -418,7 +585,7 @@ mb_regex_encoding('UTF-8');
                     }
                 }
 
-                if ($result->num_rows == 0)
+                if (!$in_base)
                 {
                     echo '<span>Chose category: 
                     <input name="category" type="text" list="categories">
@@ -427,13 +594,20 @@ mb_regex_encoding('UTF-8');
                 }
                 else
                 {
-                    echo '<span>Resource name:
+					echo '<br>';
+					echo 'Resources:';
+					echo '<br>';
+					
+					displayResources($book_id);
+					
+					/*TODO JĘDRZEJ*/
+                    /*echo '<span>Resource name:
                     <input name="tagName" type="text">
 
                     Link: <input name="link" type="text">
                     <br>
                     <input type="submit" value="Add book resource">
-                    <input type="submit" class="delete_record" value="Delete from database">';
+                    <input type="submit" class="delete_record" value="Delete from database">';*/
                 }
                 // echo '<span>
                 // Chose category: <input name="category" type="text" list="categories"><br><input class="addMultiple" type="checkbox" class="ptak">';                
