@@ -28,4 +28,5 @@
     echo
 	'<script>history.go(-1);</script>'
 	;
+	header("Location: index.php?title=".$_GET['title']);
 ?>

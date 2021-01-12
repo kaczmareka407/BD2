@@ -1,0 +1,1 @@
+@Book{Bali&#324;ska2004, title = "Projektowanie algorytm&oacute;w grafowych / Krystyna Bali&#324;ska, Krzysztof T. Zwierzy&#324;ski.&nbsp;", author = " Bali&#324;ska, Krystyna Teresa., Zwierzy&#324;ski, Krzysztof T., Politechnika Pozna&#324;ska. Wydawnictwo.", publisher = "Wydaw. Politechniki Pozna&#324;skiej", year = 2004}

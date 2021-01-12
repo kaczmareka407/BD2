@@ -271,22 +271,7 @@ mb_regex_encoding('UTF-8');
         {
             $author_cale_te = multiexplode(array(" ", ","), $author);
             $citekey = $author_cale_te[1].$year;
-            /*$title = str_replace("&nbsp;"," ",$title);
-            $author = str_replace("&nbsp;"," ",$author);
-            $publihser = str_replace("&nbsp;"," ",$publisher);
-            $year = str_replace("&nbsp;"," ",$year);*/
 
-            /* $bibtex = '<span name ="'.$citekey.'"></span>
-                <span name="title">'.str_replace("&nbsp;"," ",$title).'</span><br>
-                <span name="author">'.str_replace("&nbsp;"," ",$author).'</span><br>
-                <span name="publisher">'.str_replace("&nbsp;"," ",$publisher).'</span>
-                <span name="year">'.str_replace("&nbsp;"," ",$year).'</span><br>
-				<input type="hidden" name="title" value="'.str_replace("&nbsp;"," ",$title).'">
-				<input type="hidden" name="author" value="'.str_replace("&nbsp;"," ",$author).'">
-				<input type="hidden" name="publisher" value="'.str_replace("&nbsp;"," ",$publisher).'">
-				<input type="hidden" name="year" value="'.str_replace("&nbsp;"," ",$year).'">
-				'
-                ; */
             $bibtex = '<span name ="'.$citekey.'"></span>
             <span name="title">'.$title.'</span><br>
             <span name="author">'.$author.'</span><br>
@@ -299,15 +284,6 @@ mb_regex_encoding('UTF-8');
             '
             ;
             return $bibtex;
-            /*for($i = 0,$i<4, $i++)
-            {
-
-            }
-            for($array as $element)
-            {
-                $element = str_replace("&nbsp"," ",$element);
-            }*/
-            
         }
 
 		function displayResources($book_id)
@@ -566,7 +542,7 @@ mb_regex_encoding('UTF-8');
 					';
 		
 				}
-				else echo '<form method="POST" action="addToDataBase.php"><div class="result'.($i+1).'" style="border: 4px; border-color: red; border-style: solid;">';
+				else echo '<form method="POST" action="addToDataBase.php?title='.$_GET['title'].'"><div class="result'.($i+1).'" style="border: 4px; border-color: red; border-style: solid;">';
                 echo (($i+1)+(10*($pageNumber-1))).'  ';
                 
                 
