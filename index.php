@@ -232,9 +232,9 @@ mb_regex_encoding('UTF-8');
             //$myfile = fopen("newfile.txt", "w") or die("Unable to open file!");
             //fwrite($myfile, $file_string);
 
-            $file = "test.txt";
+            $file = "bibtex.txt";
             $txt = fopen($file, "w") or die("Unable to open file!");
-            fwrite($txt, "lorem ipsum");
+            fwrite($txt, $file_string);
             fclose($txt);
 
             header('Content-Description: File Transfer');
