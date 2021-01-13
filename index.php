@@ -34,12 +34,45 @@
     session_start();
     mb_internal_encoding("UTF-8");
     mb_http_output( "UTF-8" );
+	
+	
 ?>
 
 
 <!DOCTYPE HTML>
 <html>
     <head>
+	<script>
+				function showAddButton(book_id) 
+				{
+					var x = document.getElementById("bookResourcesAddButton"+book_id );
+					var y = document.getElementsByClassName("bookResourcesForm"+book_id);
+					if (x.style.display === "none") 
+					{
+						x.style.display = "inline";
+					} 
+					else 
+					{
+						x.style.display = "none";
+					}
+					if (x.style.display === "none") 
+					{
+						for(var i=0;i<y.length;i++)
+						{
+							y[i].style.display = "inline";
+						}
+						y.nextSibling.style.display = "inline";
+					} 
+					else 
+					{
+						for(var i=0;i<y.length;i++)
+						{
+							y[i].style.display = "none";
+						}
+						y.nextSibling.style.display = "none";
+					}
+				}
+	</script>
     <meta http-equiv="Content-Language" content="text/html; charset=UTF-8" >
     <meta charset="UTF-8" >
         <title>Bibtex database</title>
@@ -313,7 +346,7 @@ mb_regex_encoding('UTF-8');
 			while($row = $result->fetch_assoc()) 
 			{
 				
-				if (!($stmt2 = $conn->prepare('SELECT * FROM tags WHERE ID = ?')))
+				if (!($stmt2 = $conn->prepare('SELECT * FROM resource_category WHERE ID = ?')))
 				{
 					echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
 				}
@@ -335,7 +368,7 @@ mb_regex_encoding('UTF-8');
 			}
 			
 			/*Get all categories*/
-			if (!($stmt3 = $conn->prepare('SELECT tagName FROM tags')))
+			if (!($stmt3 = $conn->prepare('SELECT tagName FROM resource_category')))
 				{
 					echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
 				}
@@ -350,47 +383,10 @@ mb_regex_encoding('UTF-8');
 			while($row = $result3->fetch_assoc())
 			{
 				array_push($categories,$row['tagName']);
-			}			
-			
-			echo
-			'
-			<script>
-				function showAddButton() 
-				{
-					var x = document.getElementById("bookResourcesAddButton'.$book_id.'");
-					var y = document.getElementsByClassName("bookResourcesForm'.$book_id.'");
-					if (x.style.display === "none") 
-					{
-						x.style.display = "inline";
-					} 
-					else 
-					{
-						x.style.display = "none";
-					}
-					if (x.style.display === "none") 
-					{
-						for(var i=0;i<y.length;i++)
-						{
-							y[i].style.display = "inline";
-						}
-						y.nextSibling.style.display = "inline";
-					} 
-					else 
-					{
-						for(var i=0;i<y.length;i++)
-						{
-							y[i].style.display = "none";
-						}
-						
-						y.nextSibling.style.display = "none";
-					}
-				}
-			
-			</script>
-			';
+			}						
 			
 			/*Save button, styled as link*/
-			echo '<button type="button" onclick="showAddButton()" id="bookResourcesAddButton'.$book_id.'"
+			echo '<button type="button" onclick="showAddButton('.$book_id.')" id="bookResourcesAddButton'.$book_id.'"
 			style="
 			
 			
@@ -422,10 +418,10 @@ mb_regex_encoding('UTF-8');
 			echo 
 			'
 			
-			<form type=post class="bookResourcesForm'.$book_id.'" style="display:none">
-				<input type="text" placeholder="Resource name" class="bookResourcesForm'.$book_id.'" style="display:none">
-				<input type="text" placeholder="Resource link" class="bookResourcesForm'.$book_id.'" style="display:none">
-				<select name = "category" class="bookResourcesForm'.$book_id.'" style="display:none">
+			<form name="addRes" action="add_resource.php" method="post" class="bookResourcesForm'.$book_id.'" style="display:none">
+				<input name="book_id" type="hidden" value="'.$book_id.'" class="bookResourcesForm'.$book_id.'" style="display:none">
+				<input name="rlink" type="text" placeholder="Resource link" class="bookResourcesForm'.$book_id.'" style="display:none">
+				<select name="category" class="bookResourcesForm'.$book_id.'" style="display:none">
 				';
 				
 				echo ' <option value = "'.$categories[0].'" selected="selected">'.$categories[0].'</option> ';
@@ -438,7 +434,7 @@ mb_regex_encoding('UTF-8');
 				</select>
 				<input type="submit" value="Save" class="bookResourcesForm'.$book_id.'" style="display:none">
 			</form>
-			<button type="button" onclick="showAddButton()" class="bookResourcesForm'.$book_id.'" style="display:none">Cancel</button>
+			<button type="button" onclick="showAddButton('.$book_id.')" class="bookResourcesForm'.$book_id.'" style="display:none">Cancel</button>
 			';
 			
 			echo '</div>';
@@ -663,7 +659,8 @@ mb_regex_encoding('UTF-8');
             }
         }
         
-        
+        //used by show_resources()
+	
 
 
         display();
