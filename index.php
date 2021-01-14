@@ -260,7 +260,7 @@ mb_regex_encoding('UTF-8');
                 $file_string .= $book->get_bibtex();
                 $file_string .= "\n";
             }
-            echo($file_string);
+            //echo($file_string);
 
             //$myfile = fopen("newfile.txt", "w") or die("Unable to open file!");
             //fwrite($myfile, $file_string);
@@ -270,14 +270,14 @@ mb_regex_encoding('UTF-8');
             fwrite($txt, $file_string);
             fclose($txt);
 
-            header('Content-Description: File Transfer');
+            /*header('Content-Description: File Transfer');
             header('Content-Disposition: attachment; filename='.basename($file));
             header('Expires: 0');
             header('Cache-Control: must-revalidate');
             header('Pragma: public');
             header('Content-Length: ' . filesize($file));
-            header("Content-Type: text/plain");
-            readfile($file);
+            header("Content-Type: text/plain");*/
+            //readfile($file);
             
             //return '<span style="display:none">'.$bibtex.'</span>';
         }
