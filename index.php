@@ -168,16 +168,29 @@ mb_regex_encoding('UTF-8');
           //  <form method="POST" action="getFromDatabase.php?">
                
         //<br>
-		echo '
-        <div id="menu">To jest kontener na menu<br>
-            
-            <button id="menuSelectButton" onclick="switchAdd()" value="0">Single</button>
-        <br>
-            <button class="addMultiple" onclick="countSelected()">Dodaj zaznaczone</button>
-        <br>
-            <span id="insertResult"></span>
-        <br></div>
-        ';
+		echo'
+		<div id="menu">
+			<form action="" target="_self">
+				<label for="title">Tytuł:</label><br>
+				<input type="text" id="title" name="title">
+				<select id="base" name="base">
+					<option value="remote">Baza zdalna</option>
+					<option value="local">Baza lokalna</option>
+
+				</select>
+				<input type="submit" value="Szukaj">
+			</form>
+			
+		
+		<script>
+			var parameterValue = decodeURIComponent(window.location.search.match(/(\?|&)title\=([^&]*)/)[2]);
+
+			document.getElementById("title").value = parameterValue.replace(/\+/g, " ");
+		</script>
+		
+		
+		</div>';
+
         echo '<form action="getFromDatabase.php">
                 <input type="submit" value="Pobierz zawartość bazy do formatu bibtex" name="btn">
             </form>';
