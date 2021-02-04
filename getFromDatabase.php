@@ -1,4 +1,16 @@
 <?php
+session_start();
+//TODO funkcja arguemnty wejciowe: yyyajdi (naszobazowe)
+//utwarzam plik z jednom ksiomszkom
+
+//charset zeby polskie całe te (124 powinna działać ale nie dziaa)
+
+//zmienic nazwe plika na costam lalala bibtex
+
+//TUTU funkcja masz zamienic na nazwe funkcji jak ona sie bedzie nazywała
+//TOOD funkcja wejsciowe; tablica ajdików książek do zwrócenia
+//gdzie w jabvie werjsi skrypt autopobieradło
+//
 function multiexplode ($delimiters,$string) {
     $ready = str_replace($delimiters, $delimiters[0], $string);
     $launch = explode($delimiters[0], $ready);
@@ -111,12 +123,14 @@ function convert2bibtexFile($books){ //books = array(array([0]-title, [1]-author
     //return '<span style="display:none">'.$bibtex.'</span>';
 
     //echo '<script> document.location.href = "bibtex.txt"; </script>';
-    echo '<meta http-equiv="refresh" content="0; url=bibtex.txt">';
+    echo '<!DOCTYPE html><head><meta charset="UTF-8"></head>';
+	echo '<meta http-equiv="refresh" content="0; url=bibtex.txt">';
+	
 }
 
 
 
-    session_start();
+    //session_start();
     include("connect_to_database.php");
 	if(!$conn->ping())echo "NOT CONNECTED";
 	foreach($_POST as $x)
