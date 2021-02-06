@@ -11,6 +11,7 @@ session_start();
 //TOOD funkcja wejsciowe; tablica ajdików książek do zwrócenia
 //gdzie w jabvie werjsi skrypt autopobieradło
 //
+
 function multiexplode ($delimiters,$string) {
     $ready = str_replace($delimiters, $delimiters[0], $string);
     $launch = explode($delimiters[0], $ready);
@@ -100,32 +101,23 @@ function convert2bibtexFile($books){ //books = array(array([0]-title, [1]-author
         $book = convert2Book($value[0], $value[1], $value[2], $value[3]);
         $file_string .= $book->get_bibtex();
         $file_string .= "\n";
-    }
-    //echo($file_string);
-
-    //$myfile = fopen("newfile.txt", "w") or die("Unable to open file!");
-    //fwrite($myfile, $file_string);
-
-    $file = "bibtex.txt";
-    $txt = fopen($file, "w") or die("Unable to open file!");
-    fwrite($txt, $file_string);
-    fclose($txt);
-
-    /*header('Content-Description: File Transfer');
-    header('Content-Disposition: attachment; filename='.basename($file));
-    header('Expires: 0');
-    header('Cache-Control: must-revalidate');
-    header('Pragma: public');
-    header('Content-Length: ' . filesize($file));
-    header("Content-Type: text/plain");*/
-    //readfile($file);
-    
-    //return '<span style="display:none">'.$bibtex.'</span>';
-
-    //echo '<script> document.location.href = "bibtex.txt"; </script>';
-    echo '<!DOCTYPE html><head><meta charset="UTF-8"></head>';
-	echo '<meta http-equiv="refresh" content="0; url=bibtex.txt">';
+    }	
 	
+	echo '
+	<iframe id="my_iframe" style="display:none;"></iframe>
+	<script>
+		var link = document.createElement("a");
+    
+		link.setAttribute("download", "");
+		link.href = "bibtex.txt";
+		document.body.appendChild(link);
+		link.click();
+		link.remove();
+		window.history.back();
+	</script>
+	';
+	
+    echo '<!DOCTYPE html><head><meta charset="UTF-8"></head>';	
 }
 
 
@@ -144,8 +136,6 @@ function convert2bibtexFile($books){ //books = array(array([0]-title, [1]-author
 	//$category = 3;
 	// $category = $_POST['category'];
 
-
-			//if($stmt = $conn->prepare("INSERT INTO books (title, author, publisher, year, category) VALUES (?, ?, ?, ?, ?)"))
     if(!($stmt = $conn->prepare("SELECT * FROM books")))
     {
 		printf("Error: %s.\n", $stmt->error);
@@ -158,23 +148,15 @@ function convert2bibtexFile($books){ //books = array(array([0]-title, [1]-author
     $result = $stmt->get_result();
     $piwo_array = array();
     while($assocyjacyje = $result->fetch_assoc()){
-    $title = $assocyjacyje['title'];
-    $author = $assocyjacyje['author'];
-    $publisher = $assocyjacyje['publisher'];
-    $year = $assocyjacyje['year'];
-    $tmp_array = array($title, $author, $publisher, $year);
-    array_push($piwo_array, $tmp_array);
+		$title = $assocyjacyje['title'];
+		$author = $assocyjacyje['author'];
+		$publisher = $assocyjacyje['publisher'];
+		$year = $assocyjacyje['year'];
+		$tmp_array = array($title, $author, $publisher, $year);
+		array_push($piwo_array, $tmp_array);
     }
-    //console.log($title);
-    //convert2bibtexFile(array(array($title, $author, $publisher, $year)));
+
     convert2bibtexFile($piwo_array);
     $stmt->close();
     $conn->close();
-
-
-
-    //echo
-	//'<script>history.go(-1);</script>'
-	//;
-	//header("Location: index.php?title=".$_GET['title']);
 ?>

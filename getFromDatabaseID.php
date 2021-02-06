@@ -73,14 +73,33 @@ class Book {
 
 };
 
-function convert2bibtex($title, $author, $publisher, $year){
-    //$author_cale_te = explode(" ", $author);
-    $author_cale_te = multiexplode(array(" ", ","), $author);
-    $citekey = $author_cale_te[1].$year;
-    $bibtex = "@Book{".$citekey.", title = \"".$title."\", "
-        ."author = \"".$author."\", publisher = \"".$publisher."\", "
-        ."year = ".$year."}";
-    return '<span style="display:none">'.$bibtex.'</span>';
+function convert2bibtexFile($books){ //books = array(array([0]-title, [1]-author, [2]-publisher, [3]-year), ...)
+    $file_string = "";
+    //print_r($books);
+    foreach($books as &$value){
+        $book = convert2Book($value[0], $value[1], $value[2], $value[3]);
+        $file_string .= $book->get_bibtex();
+        $file_string .= "\n";
+    }	
+	
+	echo '
+	<iframe id="my_iframe" style="display:none;"></iframe>
+	<script>
+		var link = document.createElement("a");
+    
+		link.setAttribute("download", "");
+		link.href = "bibtex.txt";
+		document.body.appendChild(link);
+		link.click();
+		link.remove();
+		window.history.back();
+	</script>
+	';
+	
+    echo '<!DOCTYPE html><head><meta charset="UTF-8"></head>';
+	
+	//echo '<meta http-equiv="refresh" content="0; url=bibtex.txt">';
+	
 }
 
 function convert2Book($title, $author, $publisher, $year){
