@@ -11,7 +11,7 @@
 	$author = $_POST['author'];
 	$publisher = $_POST['publisher'];
 	$year = $_POST['year'];
-	$category = 3;
+	$category = 9;
 	// $category = $_POST['category'];
 
 
