@@ -393,6 +393,7 @@ function multiexplode ($delimiters,$string)
             $results = strip_tags(file_get_html('https://pp-hip.pfsl.poznan.pl/ipac20/ipac.jsp?index=.GW&term='.$title.'&page=1')
                                  ->find('body table.tableBackground a.normalBlackFont2')[0]
                                  ->children(0));
+			if($results=="") $results = 0;
             echo '<p class="results">Results: '.$results.'</p>';
             /*
                 jako, że przypada po 10 pozycji na strone, na podstawie liczby wyników obliczamy liczbę stron
@@ -407,31 +408,67 @@ function multiexplode ($delimiters,$string)
 
         function display()
         {
-            $number_of_pages = 0;
-            echo '<div id="mainPanel">';
-            if(!empty(@$_GET['title'])) 
-            {
-                echo '<h2 class="searching">Searching: '.@$_GET['title'].'</h2>';
-                $number_of_pages = numberOfPages(str_replace(" ","+",$_GET['title']));
-            }
-            else
-            {
-                echo '<h2 class="searching">Brak wyszukiwania</h2>';
-            }
-
-            echo '<hr></div>';
+            
             $title = @$_GET['title'];
             
             if(!empty($title))
             {
                 // echo '<h2>Searching: '.$title.'</h2><br>';
                 
+                if(@$_GET['base']=="remote")
+				{
+					$number_of_pages = 0;
+					echo '<div id="mainPanel">';
+					if(!empty(@$_GET['title'])) 
+					{
+						echo '<h2 class="searching">Searching: '.@$_GET['title'].'</h2>';
+						$number_of_pages = numberOfPages(str_replace(" ","+",$_GET['title']));
+					}
+					else
+					{
+						echo '<hr></div>';
+						echo '<h2 class="searching">Brak wyszukiwania</h2>';
+						return;
+					}
+					echo '<hr></div>';
+					//wyświetlamy pozycje z każdej strony wyszukiwania
+					if($number_of_pages==0)
+					{
+						echo '<h2 class="searching">Brak wyszukiwania</h2>';
+						return;
+					}
+					for($i=1;$i<=$number_of_pages;$i++)
+					{
+						displayResults(str_replace(" ","+",$title),$i);
+					}
+				}
+				else 
+				{
+					echo '<hr>';
+					//wyświetlanie pozycji z lokalnej bazy
+					include("connect_to_database.php");
+					$queryResult = $conn->query('SELECT * FROM `books` WHERE `title` LIKE "%'.@$_GET['title'].'%";');
+					if($queryResult->num_rows==0)
+					{
+						echo '<h2 class="searching">Brak wyszukiwania</h2>';
+						$conn->close();
+						return;
+					}
+					while($row = $queryResult->fetch_assoc())
+					{
+						echo '<a href="book.php?book_id='.$row['ID'].'">Przejdź do książki</a><br> ';
+						echo'<br>'.$row['title'].'<br>'.$row['author'].'<br>'.$row['publisher'].'<br>'.$row['year'].'<br>'.$row['category'].'<br>';
+						displayResources($row['ID']);
+						echo '<br><br><br>';
+					}
+
+					$conn->close();
+				}
                 
-                //wyświetlamy pozycje z każdej strony wyszukiwania
-                for($i=1;$i<=$number_of_pages;$i++)
-                {
-                    displayResults(str_replace(" ","+",$title),$i);
-                }
+            }
+			else
+            {
+                echo '<h2 class="searching">Brak wyszukiwania</h2>';
             }
         }
 		

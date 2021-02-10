@@ -144,9 +144,10 @@ mb_regex_encoding('UTF-8');
 				<label for="title">Tytuł:</label><br>
 				<input type="text" id="title" name="title">
 				<select id="base" name="base">
-					<option value="remote">Baza zdalna</option>
-					<option value="local">Baza lokalna</option>
-
+                <option value="remote">Baza zdalna</option>
+                <option value="local"';
+                    if(@$_GET['base']=="local") echo ' selected';
+                    echo '>Baza lokalna</option>
 				</select>
 				<input type="submit" value="Szukaj">
 			</form>
