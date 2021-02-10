@@ -301,7 +301,7 @@ function multiexplode ($delimiters,$string)
 					$book_id = $result->fetch_assoc()["ID"];
 					
 					$in_base = true;
-					echo '<form method="POST" action="delete.php">'./*USUWANIE Z BAZY DODAĆ ! ! ! */
+					echo '<form method="POST" action="delete_book?book_id='.$book_id.'.php">'./*USUWANIE Z BAZY DODAĆ ! ! ! */
 					'<div class="result'.($i+1).'" style="border: 4px; border-color: green; border-style: solid;">
 					</form>
 					';
@@ -313,7 +313,7 @@ function multiexplode ($delimiters,$string)
             $conn->close();
 				
 			
-			if($in_base == true)echo '<a href="book.php?book_id='.$book_id.'">Przejdź do książki</a><br> ';	
+			if($in_base == true)echo '<a href="book.php?book_id='.$book_id.'">Przejdź do książki</a><br><br> ';	
             
 			echo (($i+1)+(10*($pageNumber-1))).'  ';
                 
@@ -447,19 +447,20 @@ function multiexplode ($delimiters,$string)
 					echo '<hr>';
 					//wyświetlanie pozycji z lokalnej bazy
 					include("connect_to_database.php");
-					$queryResult = $conn->query('SELECT * FROM `books` WHERE `title` LIKE "%'.@$_GET['title'].'%";');
-					if($queryResult->num_rows==0)
+					$result = $conn->query('SELECT * FROM `books` WHERE `title` LIKE "%'.@$_GET['title'].'%";');
+					if($result->num_rows==0)
 					{
 						echo '<h2 class="searching">Brak wyszukiwania</h2>';
 						$conn->close();
 						return;
 					}
-					while($row = $queryResult->fetch_assoc())
+					while($row = $result->fetch_assoc())
 					{
+						echo '<div style="border: 4px; border-color: green; border-style: solid;">';
 						echo '<a href="book.php?book_id='.$row['ID'].'">Przejdź do książki</a><br> ';
-						echo'<br>'.$row['title'].'<br>'.$row['author'].'<br>'.$row['publisher'].'<br>'.$row['year'].'<br>'.$row['category'].'<br>';
+						echo'<br>'.$row['title'].'<br>'.$row['author'].'<br>'.$row['publisher'].' '.$row['year'].'<br>';
 						displayResources($row['ID']);
-						echo '<br><br><br>';
+						echo '</div><br>';
 					}
 
 					$conn->close();
@@ -468,7 +469,20 @@ function multiexplode ($delimiters,$string)
             }
 			else
             {
-                echo '<h2 class="searching">Brak wyszukiwania</h2>';
+				if(@$_GET['base']!="remote")
+				{
+					include("connect_to_database.php");
+					$result = $conn->query('SELECT * FROM `books` WHERE `title` LIKE "%'.@$_GET['title'].'%";');
+					while($row = $result->fetch_assoc())
+					{
+						echo '<div style="border: 4px; border-color: green; border-style: solid;">';
+						echo '<a href="book.php?book_id='.$row['ID'].'">Przejdź do książki</a><br> ';
+						echo'<br>'.$row['title'].'<br>'.$row['author'].'<br>'.$row['publisher'].' '.$row['year'].'<br>';
+						displayResources($row['ID']);
+						echo '<br></div><br>';
+					}
+					$conn->close();
+				}
             }
         }
 		
@@ -548,6 +562,18 @@ function displayBook($book_id)
 			echo '<b>Kategoria:</b> '.$row['name'].'<hr>';
 			
 			displayResources($book_id);
+			
+			
+			echo '
+			<br><br><hr>
+			<form method="get" action="delete_book.php?book_id='.$book_id.'">
+				<input type="hidden" name="book_id" value="'.$book_id.'">
+				<input type="submit" value="Usuń książkę">
+				<input type="checkbox" id="check" required>
+				<label for="check">Potwierdź usunięcie</label>
+			</form>
+			';
+			
 			echo '</div>';
 			
 			$stmt->close();
@@ -558,6 +584,29 @@ function displayBook($book_id)
             $conn->close();
 			
 	}
-		
+	
+function deleteBook($book_id)
+{
+	echo '<script>console.log('.$book_id.');</script>';
+	echo '<script>console.log(dupa123);</script>';
+	include("connect_to_database.php");
+	if (!($stmt = $conn->prepare('DELETE FROM books WHERE ID = ?')))
+			{
+                echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
+            }
+                
+			if (!$stmt->bind_param("i", $book_id)) 
+			{
+                echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
+            }
+                
+			if (!$stmt->execute()) 
+			{
+                echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+            }
+			
+			$stmt->close();		
+			$conn->close();		
+}	
 	
 ?>
