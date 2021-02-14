@@ -14,7 +14,15 @@ session_start();
 
 require 'bibtecxfunctions.php';
 
+$desc = array(
+	0 => array('pipe', 'r'), // 0 is STDIN for process
+	1 => array('pipe', 'w'), // 1 is STDOUT for process
+	2 => array('file', 'C:\xampp\htdocs\bd2\tmp\error-output.txt', 'a') // 2 is STDERR for process
+  );
+  $cmd = 'time_counter.php';
 
+	//$pipe = popen('time_counter.php', 'rw');
+	$pipe = proc_open($cmd, $desc, $pipes);
     //session_start();
     include("connect_to_database.php");
 	if(!$conn->ping())echo "NOT CONNECTED";
@@ -51,5 +59,8 @@ require 'bibtecxfunctions.php';
 
     convert2bibtexFile($piwo_array);
     $stmt->close();
-    $conn->close();
+	$conn->close();
+	//pclose($pipe);
+	sleep(10);
+	proc_close($pipe);
 ?>
