@@ -366,12 +366,12 @@ function multiexplode ($delimiters,$string)
 
             }
 			include("connect_to_database.php");
-                if($queryResult = $conn->query('SELECT `name` FROM `categories` ORDER BY 1;'))
+                if($queryResult = $conn->query('SELECT * FROM `categories` ORDER BY 1;'))
                 {
                     echo'<datalist id="categories">';
                     while($row = $queryResult->fetch_assoc())
                     {
-                        echo '<option value="'.$row["name"].'">';
+                        echo '<option value="'.$row["name"].'">'.$row["name"].'</option>';
                     }
                     echo '</datalist>';
                 }
