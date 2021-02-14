@@ -174,13 +174,26 @@ function convert2bibtexFile($books){ //books = array(array([0]-title, [1]-author
     header('Content-Length: ' . filesize($file));
     header("Content-Type: text/plain");*/
     //readfile($file);
-    
-    //return '<span style="display:none">'.$bibtex.'</span>';
+	//return '<span style="display:none">'.$bibtex.'</span>';
 
     //echo '<script> document.location.href = "bibtex.txt"; </script>';
-    echo '<!DOCTYPE html><head><meta charset="UTF-8"></head>';
-	echo '<meta http-equiv="refresh" content="0; url=bibtex.txt">';
-	
+       echo '
+	<iframe id="my_iframe" style="display:none;"></iframe>
+	<script>
+		var link = document.createElement("a");
+    
+   
+		link.setAttribute("download", "");
+		link.href = "bibtex.txt";
+		document.body.appendChild(link);
+		link.click();
+		link.remove();
+		window.history.back();
+	</script>
+	';
+	 echo '<!DOCTYPE html><head><meta charset="UTF-8"></head>';	
+	 // echo '<!DOCTYPE html><head><meta charset="UTF-8"></head>';
+	//echo '<meta http-equiv="refresh" content="0; url=bibtex.txt">';
 }
 
 ?>
