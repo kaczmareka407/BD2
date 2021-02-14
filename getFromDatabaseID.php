@@ -1,16 +1,6 @@
 <?php
 session_start();
-//TODO funkcja arguemnty wejciowe: yyyajdi (naszobazowe)
-//utwarzam plik z jednom ksiomszkom
 
-//charset zeby polskie całe te (124 powinna działać ale nie dziaa)
-
-//zmienic nazwe plika na costam lalala bibtex
-
-//TUTU funkcja masz zamienic na nazwe funkcji jak ona sie bedzie nazywała
-//TOOD funkcja wejsciowe; tablica ajdików książek do zwrócenia
-//gdzie w jabvie werjsi skrypt autopobieradło
-//
 require 'bibtecxfunctions.php';
 
     //session_start();
@@ -20,17 +10,7 @@ require 'bibtecxfunctions.php';
 	{
 		echo $x.'<br>';
 	}
-	//$title = $_POST['title'];
-	//$author = $_POST['author'];
-	//$publisher = $_POST['publisher'];
-	//$year = $_POST['year'];
-	//$category = 3;
-	// $category = $_POST['category'];
 
-
-			//if($stmt = $conn->prepare("INSERT INTO books (title, author, publisher, year, category) VALUES (?, ?, ?, ?, ?)"))
-    //if(isset($argc)){
-		//$ajdidowyplucia = $argv[0];
 	$ajdidowyplucia=$_GET["value2"];
 	if(!($stmt = $conn->prepare("SELECT * FROM books WHERE ID like $ajdidowyplucia")))
     {
@@ -51,16 +31,11 @@ require 'bibtecxfunctions.php';
     $tmp_array = array($title, $author, $publisher, $year);
     array_push($piwo_array, $tmp_array);
     }
-    //console.log($title);
-    //convert2bibtexFile(array(array($title, $author, $publisher, $year)));
+
     convert2bibtexFile($piwo_array);
-	//}else{
-		//echo "Kurde belka żeś coś skopał bo ja nie wiem co za ID ty chcesz tej";
-	//}
+
     $stmt->close();
     $conn->close();
-
-
 
     //echo
 	//'<script>history.go(-1);</script>'

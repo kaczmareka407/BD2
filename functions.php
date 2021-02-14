@@ -54,6 +54,15 @@
 			-webkit-logical-width: auto; /* Chrome ignores auto, but here for completeness */
 			 
 	}
+	
+	button
+	{
+		border-radius: 4px;
+	}
+	input
+	{
+		border-radius: 4px;
+	}
 	</style>
 <?php
 
@@ -149,7 +158,7 @@ function multiexplode ($delimiters,$string)
 				$tagname = $result2->fetch_assoc()['tagName'];
 				
 				
-				echo '<div style="white-space: nowrap; font-style: italic; display:inline-block; width: 200px;"><div style="width:75px; max-width:75px; display:inline-block;">' . $tagname.'  </div><div style="display:inline-block;overflow: hidden;  text-overflow: ellipsis; width:150px; max-width:150px; "><a href="'. $row['link'].'">'.$row['link'].'</a></div></div>';
+				echo '<div style="white-space: nowrap; font-style: italic; display:inline-block; width: 200px;"><div style="width:75px; max-width:75px; display:inline-block;">' . $tagname.'  </div><div style="display:inline-block;overflow: hidden;  text-overflow: ellipsis; width:150px; max-width:150px; "><a href="//'. $row['link'].'" target="_blank">'.$row['link'].'</a></div></div>';
 				if(basename($_SERVER['PHP_SELF']) == "book.php")
 				{
 					//TODO usuwanie zasobów
@@ -509,7 +518,7 @@ function delete_resource($resource_id)
 	}
 
 function displayBook($book_id)
-	{
+{
 		include("connect_to_database.php");
 		
 		
@@ -563,12 +572,18 @@ function displayBook($book_id)
 			
 			displayResources($book_id);
 			
-			
 			echo '
 			<br><br><hr>
+			<form action="getFromDatabaseID.php">
+				<input type="hidden" name="value2" value="'.$book_id.'">
+				<input type="submit" name="btn" value="Pobierz książkę w formacie bibtex">
+			</form>
+			
+			<br>
+			
 			<form method="get" action="delete_book.php?book_id='.$book_id.'">
 				<input type="hidden" name="book_id" value="'.$book_id.'">
-				<input type="submit" value="Usuń książkę">
+				<input type="submit" value="Usuń książkę" style="color: #FFFFFF; background-color: #FF0000;">
 				<input type="checkbox" id="check" required>
 				<label for="check">Potwierdź usunięcie</label>
 			</form>
@@ -583,18 +598,16 @@ function displayBook($book_id)
 
             $conn->close();
 			
-	}
+}
 	
 function deleteBook($book_id)
 {
-	echo '<script>console.log('.$book_id.');</script>';
-	echo '<script>console.log(dupa123);</script>';
+	//SET @p0='26'; CALL `deleteResources`(@p0);
 	include("connect_to_database.php");
-	if (!($stmt = $conn->prepare('DELETE FROM books WHERE ID = ?')))
+			if (!($stmt = $conn->prepare('CALL deleteResources(?);')))
 			{
                 echo "Prepare failed: (" . $conn->errno . ") " . $conn->error;
-            }
-                
+            }   
 			if (!$stmt->bind_param("i", $book_id)) 
 			{
                 echo "Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error;
