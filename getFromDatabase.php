@@ -61,6 +61,7 @@ $desc = array(
     $stmt->close();
 	$conn->close();
 	//pclose($pipe);
-	sleep(10);
+	sleep(1);
+	proc_terminate($pipe);
 	proc_close($pipe);
 ?>
