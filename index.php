@@ -166,22 +166,6 @@ mb_regex_encoding('UTF-8');
                 <input type="submit" value="Pobierz zawartość bazy do formatu bibtex" name="btn">
             </form>';
 			
-			
-			//do value zamiast "2" wrzuc ten ID z bazy co ciebie intereere i ten sie wypluje dla jego
-		 echo '<form action="getFromDatabaseID.php">
-				<input type="hidden" value="2" name="value2">
-                <input type="submit" value="Pobierz wybrany element bazy do formatu bibtex" name="btn">
-            </form>';
-		
-		//do value wrzucamy tablice (pol.stół) z ID które chcemy w pliku wyplutym. elemetna tablycy odzielone winny byc przecinkamy lub spacyią
-		 echo '<form action="getFromDatabaseStol.php">
-				<input type="hidden" value="2,1,3,7" name="value2">
-                <input type="submit" value="Pobierz wybrane elementy bazy do formatu bibtex" name="btn">
-            </form>';
-
-
-        
-
 
         display();
         ?>
